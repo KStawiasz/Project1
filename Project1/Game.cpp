@@ -1,6 +1,11 @@
 #include "Game.h"
+#include <SFML/Graphics.hpp>
+#include <iostream>
 
 //Private functions
+
+
+
 void Game::initWindow()
 {
 	this->window = new sf::RenderWindow(sf::VideoMode(800, 600), "Space Ship Game", sf::Style::Close | sf::Style::Titlebar); //Window with close and title
@@ -60,6 +65,7 @@ void Game::initEnemies()
 //Constructors / Destructors
 Game::Game()
 {
+	isPaused = false;
 	this->initWindow(); //Inicjalizowanie okna
 	this->initTextures(); //Inicjalizowanie tekstur
 	this->initGUI();
@@ -95,6 +101,7 @@ Game::~Game()
 }
 
 //Functions
+
 void Game::run()
 {
 	//as soon as we close the window, function "game.run()" exits and main returns 0
@@ -105,18 +112,120 @@ void Game::run()
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
 void Game::updatePollEvents() //pollEvents sluzy do obslugi zdarzen - zamkniecie okna, nacisniecie klawisza itp.
 {
 	sf::Event e;
-	while (this->window->pollEvent(e)) //Grabs event from the window and shoves into e variable, checks if the close button is pressed
+	while (this->window->pollEvent(e))
 	{
-		if (e.Event::type == sf::Event::Closed)
-			this->window->close();	//Window closes, when the button Close is pressed
-		else if (e.Event::KeyPressed && e.Event::key.code == sf::Keyboard::Escape) //If a key was pressed and key;s code is escape then window->close
+		if (e.type == sf::Event::Closed)
+		{
 			this->window->close();
+		}
+		else if (e.type == sf::Event::KeyPressed)
+		{
+			if (e.key.code == sf::Keyboard::Escape)
+			{
+				if (!this->isPaused)
+				{
+					this->isPaused = true;
+					this->displayPauseMenu();
+				}
+				else
+				{
+					this->isPaused = false;
+				}
+			}
+			else if (e.key.code == sf::Keyboard::F1)
+			{
+				this->displayHelpScreen();
+			}
+		}
 	}
 }
+void Game::displayPauseMenu() //Wyswietla menu pauzy
+{
+	sf::Text wyjscie;
+	sf::Text tekst;
+	tekst.setFont(font);
+	tekst.setCharacterSize(30);
+	tekst.setFillColor(sf::Color::White);
+	tekst.setPosition(100, 150);
 
+	tekst.setString("Wcisnij (R), aby wznowic gre! \n\nWyjdz (Esc)");
+	this->window->clear();
+	this->window->draw(tekst);
+	this->window->display();
+
+	// Czekaj na odpowiedni klawisz
+	bool waitingForKey = true;
+	while (waitingForKey)
+	{
+		sf::Event e;
+		while (this->window->pollEvent(e))
+		{
+			if (e.type == sf::Event::Closed)
+			{
+				this->window->close();
+				waitingForKey = false;
+			}
+			else if (e.type == sf::Event::KeyPressed)
+			{
+				if (e.key.code == sf::Keyboard::Escape)
+				{
+					this->window->close();
+					waitingForKey = false;
+				}
+				else if (e.key.code == sf::Keyboard::R)
+				{
+					waitingForKey = false;
+				}
+			}
+		}
+	}
+}
+void Game::displayHelpScreen()
+{
+	sf::Text helpText;
+	helpText.setFont(this->font);
+	helpText.setCharacterSize(20);
+	helpText.setFillColor(sf::Color::White);
+	helpText.setPosition(100, 100);
+	helpText.setString("Wcisnij (F1) aby wyswietlic to okno. \nPoruszasz sie strzalkami. \nStrzal (spacja).  \n\nWcisnij (R) aby wznowic gre!");
+
+	this->window->clear();
+	this->window->draw(helpText);
+	this->window->display();
+
+	bool waitingForKey = true;
+	while (waitingForKey)
+	{
+		sf::Event e;
+		while (this->window->pollEvent(e))
+		{
+			if (e.type == sf::Event::Closed)
+			{
+				this->window->close();
+				waitingForKey = false;
+			}
+			else if (e.type == sf::Event::KeyPressed)
+			{
+				if (e.key.code == sf::Keyboard::F1)
+				{
+					waitingForKey = false;
+				}
+				else if (e.key.code == sf::Keyboard::R)
+				{
+					this->isPaused = false;
+					waitingForKey = false;
+				}
+			}
+		}
+	}
+}
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
 void Game::updateInput()
 {
 	//Move the player
