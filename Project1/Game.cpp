@@ -5,7 +5,6 @@
 //Private functions
 
 
-
 void Game::initWindow()
 {
 	this->window = new sf::RenderWindow(sf::VideoMode(800, 600), "Space Ship Game", sf::Style::Close | sf::Style::Titlebar); //Window with close and title

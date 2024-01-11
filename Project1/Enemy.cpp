@@ -6,7 +6,7 @@ void Enemy::initVariables()
 {
 	this->pointCount = rand() % 8 + 3; //Maksymalna wartoœæ: 10, minimalna: 3
 	this->type		= 0;
-	this->speed		= static_cast<float>(this->pointCount * 0.6); //static_cast zmienia wartosc pointCount na float
+	this->speed		= static_cast<float>(this->pointCount * 0.2); //static_cast zmienia wartosc pointCount na float
 	this->hpMax		= static_cast<int>(this->pointCount); //static_cast zmienia wartosc pointCount na int
 	this->hp		= this->hpMax;
 	this->damage	= this->pointCount;
@@ -15,7 +15,7 @@ void Enemy::initVariables()
 
 void Enemy::initShape()
 {
-	this->shape.setRadius(this->pointCount * 5.f); //Randomizer promienia wroga
+	this->shape.setRadius(this->pointCount * 4.5f); //Randomizer promienia wroga
 	this->shape.setPointCount(this->pointCount); //Randomizer punktow obiektu wroga
 	this->shape.setFillColor(sf::Color(rand() % 254 + 1, rand() % 254 + 1, rand() % 254 + 1, 255)); //Randomizer koloru wroga na wartosciach RGB, kanal alpha=100%
 }

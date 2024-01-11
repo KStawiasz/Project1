@@ -24,6 +24,7 @@ using namespace std;
 
 class Menu
 {
+
 private:
 	sf::Font font;
 	sf::Text menu[MAX_LICZBA_POZIOMOW];//maksymalna liczba poziomow
@@ -38,6 +39,7 @@ public:
 	int getSelectedItem() { return selectedItem; }//zwroc poziom menu
 	void draw(sf::RenderWindow& window);//rysuj menu w oknie
 };
+
 
 Menu::Menu(float width, float height)
 {	//laduj czcionke
@@ -64,6 +66,7 @@ void Menu::draw(sf::RenderWindow& window)
 		window.draw(menu[i]);
 	}
 }
+
 
 void Menu::moveUp()
 {
