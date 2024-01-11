@@ -28,9 +28,14 @@ public:
 	virtual ~Player();
 
 	//Accessor
-	const sf::Vector2f& getPos() const;	//Creating bullets at the player's position
-	//const sf::FloatRect getBounds() const;	//Struktura sluzaca do reprezentowania obszarow kolizji
+	const sf::Vector2f& getPos() const;	//Pozwala na kreowanie pociskow na pozycji gracza
+	const sf::FloatRect getBounds() const;	//Struktura sluzaca do reprezentowania obszarow kolizji
 											//funkcja getBounds jest deklaracj¹ metody w klasie, która zwraca obiekt sf::FloatRect reprezentuj¹cy granice obiektu, ale nie modyfikuje ¿adnych danych w obiekcie
+
+	//Modifiers
+	void setPosition(const sf::Vector2f pos); //Zmienia/Zatrzymuje pozycje statku
+	void setPosition(const float x, const float y); //Zmienia/Zatrzymuje pozycje statku
+
 
 	//Functions
 	void move(const float dirX, const float dirY); //Funkcja inicjujaca ruch

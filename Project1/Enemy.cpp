@@ -2,28 +2,29 @@
 
 //Private functions
 
-void Enemy::initShape()
-{
-	this->shape.setRadius(rand() % 20 + 20); //Randomizer promienia wroga
-	this->shape.setPointCount(rand() %20  + 3); //Randomizer punktow obiektu wroga
-	this->shape.setFillColor(sf::Color(rand() % 254 + 1, rand() % 254 + 1, rand() % 254 + 1, 255)); //Randomizer koloru wroga na wartosciach RGB, kanal alpha=100%
-}
-
 void Enemy::initVariables()
 {
+	this->pointCount = rand() % 8 + 3; //Maksymalna wartoœæ: 10, minimalna: 3
 	this->type		= 0;
-	this->speed		= 4.f;
-	this->hpMax		= 10;
-	this->hp		= 0;
-	this->damage	= 1;
-	this->points	= 5;
+	this->speed		= static_cast<float>(this->pointCount * 0.6); //static_cast zmienia wartosc pointCount na float
+	this->hpMax		= static_cast<int>(this->pointCount); //static_cast zmienia wartosc pointCount na int
+	this->hp		= this->hpMax;
+	this->damage	= this->pointCount;
+	this->points	= this->pointCount; //Punkty za zabicie wroga
+}
+
+void Enemy::initShape()
+{
+	this->shape.setRadius(this->pointCount * 5.f); //Randomizer promienia wroga
+	this->shape.setPointCount(this->pointCount); //Randomizer punktow obiektu wroga
+	this->shape.setFillColor(sf::Color(rand() % 254 + 1, rand() % 254 + 1, rand() % 254 + 1, 255)); //Randomizer koloru wroga na wartosciach RGB, kanal alpha=100%
 }
 
 //Constructors / Destructors
 Enemy::Enemy(float pos_x, float pos_y)
 {
-	this->initShape();
 	this->initVariables();
+	this->initShape();
 
 	this->shape.setPosition(pos_x, pos_y);
 }
@@ -37,6 +38,11 @@ Enemy::~Enemy()
 const sf::FloatRect Enemy::getBounds() const //Returns rectangle bounding-box around the enemy object
 {
 	return this->shape.getGlobalBounds();
+}
+
+const int& Enemy::getPoints() const //Returns points for being killed
+{
+	return this->points;
 }
 
 //Functions

@@ -46,13 +46,24 @@ Player::~Player()
  //Accessor
 const sf::Vector2f& Player::getPos() const
 {
-	return this->sprite.getPosition(); //Zwraca pozycje statku z klasy Player i nadaje ja obiektowi, na ktorym jest wywolana ta metoda, w moim wypadku dla pocisku
+	return this->sprite.getPosition(); //Zwraca pozycje statku z klasy Player i nadaje ja obiektowi, na ktorym jest wywolana ta metoda, w moim wypadku dla playera
 }
 
-//const sf::FloatRect Player::getBounds() const
-//{
-//	return this->sprite.getGlobalBounds();
-//}
+const sf::FloatRect Player::getBounds() const
+{
+	return this->sprite.getGlobalBounds();
+}
+
+//Modifiers
+void Player::setPosition(const sf::Vector2f pos)
+{
+	this->sprite.setPosition(pos);
+}
+
+void Player::setPosition(const float x, const float y)
+{
+	this->sprite.setPosition(x, y);
+}
 
 //Functions
 void Player::move(const float dirX, const float dirY)

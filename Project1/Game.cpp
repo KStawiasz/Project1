@@ -14,6 +14,37 @@ void Game::initTextures()
 	this->textures["BULLET"]->loadFromFile("Textures/bullet.png");
 }
 
+void Game::initGUI()
+{
+	//Loads font
+	this->font.loadFromFile("arial.ttf");
+
+	//Initialize point text
+	this->pointText.setFont(this->font);
+	this->pointText.setCharacterSize(12);
+	this->pointText.setFillColor(sf::Color::White);
+	this->pointText.setString("Test");
+}
+
+void Game::initSwiat()
+{
+	if (worldBcgTexture.loadFromFile("textures/background.jpg"))
+	{
+		std::cout << "Zaladowano teksture swiata!" << "\n";
+	}
+
+	else {
+		std::cout << "ERROR: Game::InitSwiat: Nie zaladowano tekstury swiata!" << "\n";
+	}
+
+	this->worldBcg.setTexture(this->worldBcgTexture);
+}
+
+void Game::initSystems()
+{
+	this->points = 0;
+}
+
 void Game::initPlayer()
 {
 	this->player = new Player(); //Player pointer = new player
@@ -31,6 +62,9 @@ Game::Game()
 {
 	this->initWindow(); //Inicjalizowanie okna
 	this->initTextures(); //Inicjalizowanie tekstur
+	this->initGUI();
+	this->initSwiat(); //Inicjalizowanie swiata
+	this->initSystems(); //Inicjalizowanie systemu liczenia punktów
 	this->initPlayer(); //Inicjalizowanie gracza
 	this->initEnemies(); //Inicjalizowanie wrogow
 }
@@ -74,7 +108,7 @@ void Game::run()
 void Game::updatePollEvents() //pollEvents sluzy do obslugi zdarzen - zamkniecie okna, nacisniecie klawisza itp.
 {
 	sf::Event e;
-	while (this->window->pollEvent(e)) //Grabs event from the window and shoves into ev variable, checks if the close button is pressed
+	while (this->window->pollEvent(e)) //Grabs event from the window and shoves into e variable, checks if the close button is pressed
 	{
 		if (e.Event::type == sf::Event::Closed)
 			this->window->close();	//Window closes, when the button Close is pressed
@@ -101,6 +135,49 @@ void Game::updateInput()
 	}
 }
 
+void Game::updateGUI() //Funkcja updateGUI nale¿y do klasy Game i s³u¿y do aktualizacji interfejsu u¿ytkownika (GUI). Wykorzystuje obiekt klasy std::stringstream o nazwie ss.
+{
+	std::stringstream ss; //Tworzenie strumienia stringstream do formatowania danych tekstowych, stringstream operuje na lancuchu znakow
+
+	ss << "Points " << this->points; //Operator "<<" jest u¿ywany, aby przekszta³ciæ wartoœæ zmiennej this->points do formatu tekstowego i umieœciæ go w strumieniu ss
+
+	this->pointText.setString(ss.str()); //Tutaj uzyskujemy finalny wynik w postaci tekstu z obiektu ss za pomoc¹ ss.str() i ustawiamy ten tekst jako zawartoœæ obiektu pointText.
+}
+
+void Game::updateSwiat()
+{
+
+}
+
+void Game::updateKolizja() //Ograniczanie ruchow gracza, zeby na osi X i Y wrocil do swojej pozycji 
+{
+
+	//Left side collision
+	if (this->player->getBounds().left < 0.f)
+	{
+		this->player->setPosition(0.f, this->player->getBounds().top);
+	}
+
+	//Right side collision
+	else if (this->player->getBounds().left + this->player->getBounds().width >= this->window->getSize().x)
+	{
+		this->player->setPosition(this->window->getSize().x - this->player->getBounds().width, this->player->getBounds().top);
+	}
+
+	//Top side collision
+	if (this->player->getBounds().top < 0.f)
+	{
+		this->player->setPosition(this->player->getBounds().left, 0.f);
+	}
+
+	//Bottom side collision
+	else if (this->player->getBounds().top + this->player->getBounds().height >= this->window->getSize().y)
+	{
+		this->player->setPosition(this->player->getBounds().left, this->window->getSize().y - this->player->getBounds().height);
+	}
+
+}
+
 void Game::updateBullets()
 {
 	unsigned counter = 0; //Zmienna o nazwie counter i typie unsigned (przechowuje liczby nieujemne, pocz¹tkowa wartoœæ tej zmiennej to 0)
@@ -111,9 +188,9 @@ void Game::updateBullets()
 		//Removing bullet if its not visible, or meets the condition
 		if (bullet->getBounds().top + bullet->getBounds().height < 0.f) //Deletes bullet when it hits the top of the screen
 		{
-			//Delete bullet
-			delete this->bullets.at(counter); //Because Bullets are dynamic I have to delete them 
-			this->bullets.erase(this->bullets.begin() + counter);
+			//Delete bullet when it hits the top of the window
+			delete this->bullets.at(counter);  //Because bullets are dynamic, so I delete them first
+			this->bullets.erase(this->bullets.begin() + counter); //then erase from the Vector
 			--counter;
 
 		}
@@ -122,8 +199,9 @@ void Game::updateBullets()
 	}
 }
 
-void Game::updateEnemiesAndCombat() //Spawns enemies
+void Game::updateEnemies() //Spawns enemies
 {
+	//Spawning
 	this->spawnTimer += 0.5f; //Timer stale wzrasta
 	if (this->spawnTimer >= this->spawnTimerMax) //Warunek sprawdzaj¹cy, czy aktualny czas do spawnu wroga jest wiêkszy lub równy maksymalnemu czasowi do spawnu.
 	{
@@ -131,25 +209,52 @@ void Game::updateEnemiesAndCombat() //Spawns enemies
 		this->spawnTimer = 0.f; //Jesli warunek jest spelniony, to ustawia timer spawnu na 0.0
 	}
 
-	for (int i = 0; i < this->enemies.size(); ++i)
+	//Update
+	unsigned counter = 0; //Zmienna o nazwie counter i typie unsigned (przechowuje liczby nieujemne, pocz¹tkowa wartoœæ tej zmiennej to 0)
+	for (auto* enemy : this->enemies)
 	{
-		this->enemies[i]->update();
-		
-		for (int k = 0; k < this->bullets.size(); ++k) 
+		enemy->update();
+
+		//Removing enemy if its not visible, or meets the condition
+		if (enemy->getBounds().top > this->window->getSize().y) //Deletes enemy when it hits the bottom of the screen
 		{
-			if (this->bullets[k]->getBounds().intersects(this->enemies[i]->getBounds())) 
-			{
-				this->bullets.erase(this->bullets.begin() + k); //Deletes bullet po trafieniu
-				this->enemies.erase(this->enemies.begin() + i); //Deletes enemy po trafieniu
-			}
+			//Delete enemy when it hits the bottom of the window
+			delete this->enemies.at(counter); //Because enemies are dynamic, so I delete them first
+			this->enemies.erase(this->enemies.begin() + counter); //then erase from the Vector
+			--counter;
+
+		}
+		else if(enemy->getBounds().intersects(this->player->getBounds())) //Deletes enemy when touches the player
+		{  
+			delete this->enemies.at(counter); //Because enemies are dynamic, so I delete them first
+			this->enemies.erase(this->enemies.begin() + counter); //then erase from the Vector
+			--counter;
 		}
 
-		//Usuwanie wroga na dole ekranu
-		if (this->enemies[i]->getBounds().top > this->window->getSize().y)
+		++counter;
+	}
+}
+
+void Game::updateCombat()
+{	//Usuwanie wroga przy zestrzeleniu
+	for (int i = 0; i < this->enemies.size(); ++i) //Petla iterujaca po wszystkich obiektach w wektorze 'Enemies'
+	{
+		bool enemy_deleted = false; //zmienna sledzaca, czy wrog juz zostal usuniety
+		for (size_t k = 0; k < this->bullets.size() && enemy_deleted == false; k++) //Uzywamy wektora bullet w petli, size_t do deklaracji k w petli, ktora iteruje wektor pociskow, pêtla wzgledem wszystkik pociskow. Petla sprawdza, czy pocisk przecina obszar wroga
 		{
-			this->enemies.erase(this->enemies.begin() + i); //Usuwanie z wektora za pomoca funkcji erase
-			std::cout << this->enemies.size() << "\n";
-		}													//Usuwa coœ z pocz¹tku oraz pozycje zmiennej "i"
+			if (this->enemies[i]->getBounds().intersects(this->bullets[k]->getBounds())) //Sprawdza kolizje dwoch wektorow, intersect to funkcja przeciecia
+			{
+				this->points += this->enemies[i]->getPoints(); //Dodaje punkty za trafienie
+
+				delete this->enemies[i];  //Because enemies are dynamic, so I delete them first
+				this->enemies.erase(this->enemies.begin() + i); //then erase from the Vector
+
+				delete this->bullets[k];  //Because bullets are dynamic, so I delete them first
+				this->bullets.erase(this->bullets.begin() + k); //then erase from the Vector
+				
+				enemy_deleted = true;	//Przerywa petle wewnetrzna, poniewaz wrog zostal juz trafiony i usuniety
+			}
+		}
 	}
 }
 
@@ -161,14 +266,35 @@ void Game::update() //Game updates, positions etc
 
 	this->player->update();
 
+	this->updateKolizja();
+
 	this->updateBullets();
 
-	this->updateEnemiesAndCombat();
+	this->updateEnemies();
+
+	this->updateCombat();
+
+	this->updateGUI();
+	
+	this->updateSwiat();
 }
 
-void Game::render() //Draws all the updated stuff
+void Game::renderGUI()
+{
+	this->window->draw(this->pointText);
+}
+
+void Game::renderSwiat()
+{
+	this->window->draw(this->worldBcg);
+}
+
+void Game::render() //Draws (renders) all the updated stuff
 {
 	this->window->clear(); 
+
+	//Draw background
+	this->renderSwiat();
 
 	//Draw all the stuff here:
 	this->player->render(*this->window); //Renders a player in the window directly
@@ -182,6 +308,8 @@ void Game::render() //Draws all the updated stuff
 	{
 		enemy->render(this->window); //Renders enemy in the window
 	}
+
+	this->renderGUI();
 
 	this->window->display();
 }
