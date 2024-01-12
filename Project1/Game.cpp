@@ -75,7 +75,7 @@ void Game::initPlayer()
 
 void Game::initEnemies()
 {	
-	this->spawnTimerMax = 40.f; //Maksymalny czas miedzy spawnami wrogow
+	this->spawnTimerMax = 10.f; //Maksymalny czas miedzy spawnami wrogow
 	this->spawnTimer = this->spawnTimerMax; //Ustawia aktualny czas do spawnu wroga
 }
 
