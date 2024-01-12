@@ -17,6 +17,9 @@ private:
 	float attackCooldown; //Cooldown ataku
 	float attackCooldownMax; 
 
+	int hp;
+	int hpMax;
+
 	//Private functions
 	void initVariables();
 	void initTexture();
@@ -31,11 +34,13 @@ public:
 	const sf::Vector2f& getPos() const;	//Pozwala na kreowanie pociskow na pozycji gracza
 	const sf::FloatRect getBounds() const;	//Struktura sluzaca do reprezentowania obszarow kolizji
 											//funkcja getBounds jest deklaracj¹ metody w klasie, która zwraca obiekt sf::FloatRect reprezentuj¹cy granice obiektu, ale nie modyfikuje ¿adnych danych w obiekcie
+	const int& getHp() const;
+	const int& getHpMax() const;
 
 	//Modifiers
-	void setPosition(const sf::Vector2f pos); //Zmienia/Zatrzymuje pozycje statku
 	void setPosition(const float x, const float y); //Zmienia/Zatrzymuje pozycje statku
-
+	void setHp(const int hp);
+	void loseHp(const int value);
 
 	//Functions
 	void move(const float dirX, const float dirY); //Funkcja inicjujaca ruch

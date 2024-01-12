@@ -27,8 +27,15 @@ public:
 	//Accessors
 	const sf::FloatRect getBounds() const;
 	const int& getPoints() const; //This returns how many points every enemy will give me
+	const int& getDamage() const;
+	const float& getSpeed() const;
 
 	//Functions
+	void setSpeed(float newSpeed) //Zmienia wartosc predkosci
+	{
+		this->speed = newSpeed;
+	}
+
 	void update();
 	void render(sf::RenderTarget* target);
 };

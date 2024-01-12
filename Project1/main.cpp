@@ -1,12 +1,11 @@
 /*
 Projekt Krystian Stawiasz s194625
-Tytu³ gry: Space Ship
+Tytu³ gry: Space Ship Game
 Scenariusz nr 1
 */
 
 #include <iostream>
 #include "Game.h"
-#include "Player.h"
 #include <time.h>
 #include <cstdlib>
 #include <ctime>
@@ -123,7 +122,7 @@ int main()
 	Game game; //konstruktor z klasy Game
 
 	int menu_selected_flag = 0;
-	sf::RenderWindow window(sf::VideoMode(800, 600), "SFML demo");// utworz okno
+	sf::RenderWindow window(sf::VideoMode(800, 600), "Menu Space Ship Game");// utworz okno
 	Menu menu(window.getSize().x, window.getSize().y);
 	// petla wieczna - dopoki okno jest otwarte
 	while (window.isOpen())

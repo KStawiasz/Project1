@@ -7,6 +7,9 @@ void Player::initVariables()
 	this->movementSpeed = 9.f;
 	this->attackCooldownMax = 5.f;
 	this->attackCooldown = this->attackCooldownMax; //Sprawia, ze pierwszy atak bedzie instant
+
+	this->hpMax = 70;
+	this->hp = this->hpMax;
 }
 
 void Player::initTexture()
@@ -26,9 +29,11 @@ void Player::initSprite()
 {
 	//Set the texture to the sprite. Obiekt Player ustawia swoj¹ teksturê na teksturê, która jest przechowywana w obiekcie sprite
 	this->sprite.setTexture(this->texture); 
+	this->sprite.setPosition(350.f, 700.f);
 
 	//Resize the sprite
 	this->sprite.scale(0.07f, 0.07f);
+
 }
 
 //Constructors / Destructors
@@ -43,6 +48,7 @@ Player::~Player()
 {
 
 }
+
  //Accessor
 const sf::Vector2f& Player::getPos() const
 {
@@ -54,15 +60,32 @@ const sf::FloatRect Player::getBounds() const
 	return this->sprite.getGlobalBounds();
 }
 
-//Modifiers
-void Player::setPosition(const sf::Vector2f pos)
+const int& Player::getHp() const
 {
-	this->sprite.setPosition(pos);
+	return this->hp;
 }
 
+const int& Player::getHpMax() const
+{
+	return this->hpMax;
+}
+
+//Modifiers
 void Player::setPosition(const float x, const float y)
 {
 	this->sprite.setPosition(x, y);
+}
+
+void Player::setHp(const int hp) //ustawianie wartosci hp
+{
+	this->hp = hp;
+}
+
+void Player::loseHp(const int value) //tracenie hp za kazdym razem
+{
+	this->hp -= value; //Upewnienie, ze hp moze wyniesc najmniej 0
+	if (this->hp < 0)
+		this->hp = 0;
 }
 
 //Functions

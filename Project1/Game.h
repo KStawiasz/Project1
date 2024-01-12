@@ -11,6 +11,7 @@
 class Game
 {
 private:
+
 	bool isPaused; //pauzowanie gry
 
 	//Create and manage window, wskaŸnika na klase okna
@@ -24,6 +25,8 @@ private:
 	sf::Font font;
 	sf::Text pointText;
 
+	sf::Text gameOverText;
+
 	//World
 	sf::Texture worldBcgTexture;
 	sf::Sprite worldBcg;
@@ -31,8 +34,16 @@ private:
 	//Systems - system liczenia punktów
 	unsigned points;
 
+	//Zmiana predkosci wrogow
+	float enemySpeedIncreaseRate = 0.001f; //Zwiêkszania prêdkoœci wrogów
+	int enemiesDestroyed = 0; //Licznik zniszczonych wrogów
+
 	//Player
 	Player* player; //Wskaznik na klase Player
+
+	//Player GUI
+	sf::RectangleShape playerHpBar;
+	sf::RectangleShape playerHpBarBack;
 	
 	//Enemies
 	float spawnTimer; 
@@ -58,9 +69,9 @@ public:
 	//Functions
 	void run();
 
-	void updatePollEvents(); //pollEvents sluzy do obslugi zdarzen - zamkniecie okna, nacisniecie klawisza itp.
 	void displayPauseMenu();
 	void displayHelpScreen();
+	void updatePollEvents(); //pollEvents sluzy do obslugi zdarzen - zamkniecie okna, nacisniecie klawisza itp.
 	void updateInput();
 	void updateGUI();
 	void updateSwiat();

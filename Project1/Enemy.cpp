@@ -45,6 +45,16 @@ const int& Enemy::getPoints() const //Returns points for being killed
 	return this->points;
 }
 
+const int& Enemy::getDamage() const
+{
+	return this->damage;
+}
+
+const float& Enemy::getSpeed() const
+{
+	return this->speed;
+}
+
 //Functions
 void Enemy::update()
 {

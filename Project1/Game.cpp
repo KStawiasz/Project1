@@ -24,10 +24,29 @@ void Game::initGUI()
 	this->font.loadFromFile("arial.ttf");
 
 	//Initialize point text
+	this->pointText.setPosition(5, 30);
 	this->pointText.setFont(this->font);
-	this->pointText.setCharacterSize(12);
+	this->pointText.setCharacterSize(20);
 	this->pointText.setFillColor(sf::Color::White);
 	this->pointText.setString("Test");
+
+	//tekst koniec gry
+	this->gameOverText.setFont(this->font);
+	this->gameOverText.setCharacterSize(80);
+	this->gameOverText.setFillColor(sf::Color::Cyan);
+	this->gameOverText.setString("Koniec Gry!");
+	this->gameOverText.setPosition(205, 240);
+
+
+
+	//Init player GUI - Wskaznik zycia gracza
+	this->playerHpBar.setSize(sf::Vector2f(300.f, 25.f));
+	this->playerHpBar.setFillColor(sf::Color(204, 1, 15, 240));
+	this->playerHpBar.setPosition(sf::Vector2f(5, 5));
+
+
+	this->playerHpBarBack = this->playerHpBar;
+	this->playerHpBarBack.setFillColor(sf::Color(51, 21, 0, 200));
 }
 
 void Game::initSwiat()
@@ -106,43 +125,17 @@ void Game::run()
 	//as soon as we close the window, function "game.run()" exits and main returns 0
 	while (this->window->isOpen())
 	{
-		this->update();
+		this->updatePollEvents();
+
+		if(this->player->getHp() > 0)
+			this->update();
+
 		this->render();
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
-void Game::updatePollEvents() //pollEvents sluzy do obslugi zdarzen - zamkniecie okna, nacisniecie klawisza itp.
-{
-	sf::Event e;
-	while (this->window->pollEvent(e))
-	{
-		if (e.type == sf::Event::Closed)
-		{
-			this->window->close();
-		}
-		else if (e.type == sf::Event::KeyPressed)
-		{
-			if (e.key.code == sf::Keyboard::Escape)
-			{
-				if (!this->isPaused)
-				{
-					this->isPaused = true;
-					this->displayPauseMenu();
-				}
-				else
-				{
-					this->isPaused = false;
-				}
-			}
-			else if (e.key.code == sf::Keyboard::F1)
-			{
-				this->displayHelpScreen();
-			}
-		}
-	}
-}
 void Game::displayPauseMenu() //Wyswietla menu pauzy
 {
 	sf::Text wyjscie;
@@ -184,7 +177,7 @@ void Game::displayPauseMenu() //Wyswietla menu pauzy
 		}
 	}
 }
-void Game::displayHelpScreen()
+void Game::displayHelpScreen() //Wyswietla ekran pomocy F1
 {
 	sf::Text helpText;
 	helpText.setFont(this->font);
@@ -223,6 +216,36 @@ void Game::displayHelpScreen()
 		}
 	}
 }
+void Game::updatePollEvents() //pollEvents sluzy do obslugi zdarzen - zamkniecie okna, nacisniecie klawisza itp.
+{
+	sf::Event e;
+	while (this->window->pollEvent(e))
+	{
+		if (e.type == sf::Event::Closed)
+		{
+			this->window->close();
+		}
+		else if (e.type == sf::Event::KeyPressed)
+		{
+			if (e.key.code == sf::Keyboard::Escape)
+			{
+				if (!this->isPaused)
+				{
+					this->isPaused = true;
+					this->displayPauseMenu();
+				}
+				else
+				{
+					this->isPaused = false;
+				}
+			}
+			else if (e.key.code == sf::Keyboard::F1)
+			{
+				this->displayHelpScreen();
+			}
+		}
+	}
+}
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 void Game::updateInput()
@@ -250,7 +273,12 @@ void Game::updateGUI() //Funkcja updateGUI nale¿y do klasy Game i s³u¿y do aktua
 	ss << "Points " << this->points; //Operator "<<" jest u¿ywany, aby przekszta³ciæ wartoœæ zmiennej this->points do formatu tekstowego i umieœciæ go w strumieniu ss
 
 	this->pointText.setString(ss.str()); //Tutaj uzyskujemy finalny wynik w postaci tekstu z obiektu ss za pomoc¹ ss.str() i ustawiamy ten tekst jako zawartoœæ obiektu pointText.
+
+	//Update player GUI
+	float hpPercent = static_cast<float>(this->player->getHp()) / this->player->getHpMax();
+	this->playerHpBar.setSize(sf::Vector2f(300.f * hpPercent, this->playerHpBar.getSize().y));
 }
+
 
 void Game::updateSwiat()
 {
@@ -260,25 +288,25 @@ void Game::updateSwiat()
 void Game::updateKolizja() //Ograniczanie ruchow gracza, zeby na osi X i Y wrocil do swojej pozycji 
 {
 
-	//Left side collision
+	//Lewa bariera
 	if (this->player->getBounds().left < 0.f)
 	{
 		this->player->setPosition(0.f, this->player->getBounds().top);
 	}
 
-	//Right side collision
+	//Prawa bariera 
 	else if (this->player->getBounds().left + this->player->getBounds().width >= this->window->getSize().x)
 	{
 		this->player->setPosition(this->window->getSize().x - this->player->getBounds().width, this->player->getBounds().top);
 	}
 
-	//Top side collision
+	//Gorna bariera
 	if (this->player->getBounds().top < 0.f)
 	{
 		this->player->setPosition(this->player->getBounds().left, 0.f);
 	}
 
-	//Bottom side collision
+	//Dolna bariera
 	else if (this->player->getBounds().top + this->player->getBounds().height >= this->window->getSize().y)
 	{
 		this->player->setPosition(this->player->getBounds().left, this->window->getSize().y - this->player->getBounds().height);
@@ -299,8 +327,6 @@ void Game::updateBullets()
 			//Delete bullet when it hits the top of the window
 			delete this->bullets.at(counter);  //Because bullets are dynamic, so I delete them first
 			this->bullets.erase(this->bullets.begin() + counter); //then erase from the Vector
-			--counter;
-
 		}
 
 		++counter; 
@@ -329,18 +355,29 @@ void Game::updateEnemies() //Spawns enemies
 			//Delete enemy when it hits the bottom of the window
 			delete this->enemies.at(counter); //Because enemies are dynamic, so I delete them first
 			this->enemies.erase(this->enemies.begin() + counter); //then erase from the Vector
-			--counter;
-
 		}
-		else if(enemy->getBounds().intersects(this->player->getBounds())) //Deletes enemy when touches the player
-		{  
+		//Player hits an enemy
+		else if (enemy->getBounds().intersects(this->player->getBounds())) //Deletes enemy when touches the player
+		{
+			this->player->loseHp(this->enemies.at(counter)->getDamage()); //Pobiera wartoœæ obra¿eñ od aktualnego wroga, na którym aktualnie iteruje pêtla
 			delete this->enemies.at(counter); //Because enemies are dynamic, so I delete them first
 			this->enemies.erase(this->enemies.begin() + counter); //then erase from the Vector
-			--counter;
 		}
 
 		++counter;
+
 	}
+
+	if (Game::enemiesDestroyed > 0) 
+    {
+        for (auto& enemy : this->enemies) 
+        {
+            float currentSpeed = enemy->getSpeed();
+            enemy->setSpeed(currentSpeed + (currentSpeed * Game::enemySpeedIncreaseRate * Game::enemiesDestroyed));
+        }
+    }
+
+
 }
 
 void Game::updateCombat()
@@ -353,6 +390,7 @@ void Game::updateCombat()
 			if (this->enemies[i]->getBounds().intersects(this->bullets[k]->getBounds())) //Sprawdza kolizje dwoch wektorow, intersect to funkcja przeciecia
 			{
 				this->points += this->enemies[i]->getPoints(); //Dodaje punkty za trafienie
+				this->enemiesDestroyed++; // Zwiêksz licznik zniszczonych wrogów
 
 				delete this->enemies[i];  //Because enemies are dynamic, so I delete them first
 				this->enemies.erase(this->enemies.begin() + i); //then erase from the Vector
@@ -368,8 +406,6 @@ void Game::updateCombat()
 
 void Game::update() //Game updates, positions etc 
 {
-	this->updatePollEvents();
-
 	this->updateInput();
 
 	this->player->update();
@@ -390,6 +426,8 @@ void Game::update() //Game updates, positions etc
 void Game::renderGUI()
 {
 	this->window->draw(this->pointText);
+	this->window->draw(this->playerHpBarBack);
+	this->window->draw(this->playerHpBar);
 }
 
 void Game::renderSwiat()
@@ -418,6 +456,10 @@ void Game::render() //Draws (renders) all the updated stuff
 	}
 
 	this->renderGUI();
+
+	//napis Koniec Gry!
+	if (this->player->getHp() <= 0)
+		this->window->draw(this->gameOverText);
 
 	this->window->display();
 }
